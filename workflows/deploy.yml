@@ -22,8 +22,8 @@ name: Deploy to GitHub Pageson:push:branches:- mainjobs:build-and-deploy:runs-on
       # Aktualisierten Inhalt in die Datei zurückschreiben
       echo "$UPDATED_HTML_CONTENT" > chat_app.html
 
-  - name: Rename to index.html
-    run: mv chat_app.html index.html
+  - name: index.html
+    run: index.html
       
   - name: Deploy to GitHub Pages
     uses: peaceiris/actions-gh-pages@v3
