@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rabbit-talk</title>
+    <!-- Tailwind CSS CDN für einfache und schnelle Gestaltung -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <!-- Font Awesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -15,7 +16,7 @@
             color: #e0e0e0;
         }
         .chat-container {
-            height: calc(100vh - 12rem); 
+            height: calc(100vh - 12rem); /* Dynamische Höhe für den Nachrichtenbereich */
             overflow-y: auto;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE und Edge */
@@ -23,14 +24,14 @@
         .chat-container::-webkit-scrollbar {
             display: none; /* Chrome, Safari, Opera */
         }
-  
+        /* Stil für Bildnachrichten */
         .message-image {
             max-width: 100%;
             height: auto;
             border-radius: 0.5rem;
             margin-top: 0.5rem;
         }
-    
+        /* Touch-freundliche Styles für Buttons und Inputs */
         .btn-touch {
             min-width: 48px;
             min-height: 48px;
@@ -57,7 +58,7 @@
 </head>
 <body class="flex flex-col h-screen p-4 sm:p-6 lg:p-8">
     <div class="flex-grow flex flex-col max-w-lg mx-auto w-full">
-  
+        <!-- App-Titel und Benutzer-ID -->
         <div class="flex justify-between items-center mb-4">
             <div>
                 <h1 id="app-title" class="text-3xl font-bold"></h1>
@@ -72,12 +73,12 @@
             </div>
         </div>
 
-
+        <!-- Nachrichtenbereich -->
         <div id="messages" class="chat-container flex-grow p-4 bg-[#2a2a2a] rounded-xl shadow-lg mb-4 space-y-4">
             <div id="status-message" class="text-center text-gray-500"></div>
         </div>
 
- 
+        <!-- Eingabebereich -->
         <form id="message-form" class="flex items-center space-x-2">
             <input type="text" id="message-input"
                    class="flex-grow p-3 rounded-lg bg-[#3a3a3a] text-white focus:outline-none focus:ring-2 focus:ring-[rgb(255,93,2)] border-2 border-transparent focus:border-[rgb(255,93,2)] transition-all duration-200 input-touch"
@@ -92,7 +93,7 @@
         </form>
     </div>
 
-
+    <!-- Benutzername Modal -->
     <div id="name-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
         <div class="bg-[#2a2a2a] p-8 rounded-lg shadow-lg w-96">
             <h2 id="modal-title" class="text-xl font-bold text-center mb-4"></h2>
@@ -104,19 +105,28 @@
         </div>
     </div>
     
-
+    <!-- Meldungsbox -->
     <div id="message-box" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-xl hidden transition-opacity duration-300 z-50"></div>
 
-
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
-
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Die folgenden Platzhalter werden von GitHub Actions während des Deployments ersetzt.
+        // Fügen Sie diese nicht manuell ein!
+        const firebaseConfig = {
+            apiKey: "${FIREBASE_API_KEY}",
+            authDomain: "${FIREBASE_AUTH_DOMAIN}",
+            projectId: "${FIREBASE_PROJECT_ID}",
+            storageBucket: "${FIREBASE_STORAGE_BUCKET}",
+            messagingSenderId: "${FIREBASE_MESSAGING_SENDER_ID}",
+            appId: "${FIREBASE_APP_ID}"
+        };
+        
+        // Ersetzen Sie 'your-app-id' durch einen beliebigen, eindeutigen String für Ihre App.
+        const appId = "your-app-id";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -138,7 +148,7 @@
 
         let displayName = localStorage.getItem('chatDisplayName') || '';
 
-  
+        // Mehrsprachige Übersetzungen
         const translations = {
             de: {
                 app_title: 'rabbit-talk',
@@ -178,7 +188,7 @@
 
         let currentLang = localStorage.getItem('chatLanguage') || 'de';
 
-
+        // Funktion zur Anzeige von temporären Meldungen
         function showMessage(text) {
             messageBox.textContent = text;
             messageBox.classList.remove('hidden');
@@ -186,13 +196,14 @@
                 messageBox.classList.add('hidden');
             }, 3000);
         }
-        
+
+        // Funktion zur Aktualisierung der Sprache
         function updateLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('chatLanguage', lang);
             const t = translations[lang];
 
-     
+            // UI-Elemente aktualisieren
             document.getElementById('app-title').textContent = t.app_title;
             messageInput.placeholder = t.message_placeholder;
             document.getElementById('send-btn').textContent = t.send_btn;
@@ -201,7 +212,7 @@
             document.getElementById('save-name-btn').textContent = t.save_btn;
             statusMessage.textContent = t.status_connecting;
             
-      
+            // Benutzer-Status-Text aktualisieren
             if (displayName) {
                 userDisplayName.textContent = t.user_status_name + displayName;
             } else if (auth.currentUser) {
@@ -209,7 +220,7 @@
             }
         }
         
-       
+        // Sprache beim Laden initialisieren
         languageSelector.value = currentLang;
         updateLanguage(currentLang);
         
@@ -217,7 +228,7 @@
             updateLanguage(e.target.value);
         });
 
-
+        // Funktion zum Anzeigen von Nachrichten
         function displayMessage(message, isMe) {
             const t = translations[currentLang];
             const messageElement = document.createElement('div');
@@ -247,11 +258,11 @@
                 const imageElement = document.createElement('img');
                 imageElement.classList.add('message-image');
                 imageElement.src = message.image;
-                imageElement.loading = 'lazy'; 
+                imageElement.loading = 'lazy'; // Bild-Laden optimieren
                 messageElement.appendChild(imageElement);
             }
 
-    
+            // Moderationsbuttons
             const actionsContainer = document.createElement('div');
             actionsContainer.classList.add('absolute', 'top-0', 'flex', 'space-x-1', 'p-1', 'opacity-0', 'group-hover:opacity-100', 'transition-opacity');
             
@@ -261,7 +272,7 @@
                 deleteButton.classList.add('text-red-400', 'hover:text-red-600');
                 deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 deleteButton.title = 'Löschen';
-           
+                // Die Löschfunktion wird nur ausgelöst, wenn der Benutzer der Autor der Nachricht ist
                 if (message.senderId === auth.currentUser.uid) {
                     deleteButton.addEventListener('click', () => deleteMessage(message.docId));
                 }
@@ -281,10 +292,10 @@
             messagesContainer.appendChild(messageElement);
         }
 
-
+        // Funktion zum Löschen einer Nachricht
         async function deleteMessage(docId) {
             try {
-         
+                // Pfad wurde auf den öffentlichen Pfad geändert
                 const messageRef = doc(db, `artifacts/${appId}/public/data/messages`, docId);
                 await deleteDoc(messageRef);
                 console.log(`Nachricht ${docId} gelöscht.`);
@@ -293,33 +304,33 @@
             }
         }
 
-  
+        // Funktion zum Melden einer Nachricht (Platzhalter)
         function reportMessage(docId) {
             console.log(`Nachricht ${docId} wurde gemeldet. In einer realen App würde dies an ein Moderationsteam gesendet.`);
             showMessage(translations[currentLang].report_message);
         }
 
-
+        // Live-Update von Nachrichten
         function listenForMessages() {
-        
+            // Pfad wurde auf den öffentlichen Pfad geändert, um einen Gruppenchat zu ermöglichen
             const messagesCollectionPath = `artifacts/${appId}/public/data/messages`;
             let isInitialLoad = true;
-       
+            // Der orderBy-Teil wurde entfernt, um Berechtigungsfehler zu vermeiden
             const q = query(collection(db, messagesCollectionPath));
 
             onSnapshot(q, (snapshot) => {
-           
+                // Prüfen, ob eine neue Nachricht hinzugefügt wurde
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added" && !isInitialLoad) {
                         const newMessage = change.doc.data();
-                       
+                        // Vibrationsfunktion nur auslösen, wenn die Nachricht von einem anderen Benutzer kommt
                         if (navigator.vibrate && newMessage.senderId !== auth.currentUser.uid) {
-                            navigator.vibrate(200); 
+                            navigator.vibrate(200); // Vibriert für 200ms
                         }
                     }
                 });
 
-     
+                // Nachrichtencontainer leeren und neu befüllen
                 messagesContainer.innerHTML = '';
                 
                 if (statusMessage) {
@@ -346,7 +357,7 @@
             });
         }
 
-
+        // Benutzerauthentifizierung
         onAuthStateChanged(auth, async (user) => {
             const t = translations[currentLang];
             if (user) {
@@ -354,24 +365,18 @@
                 if (displayName) {
                     userDisplayName.textContent = t.user_status_name + displayName;
                 } else {
-                
+                    // Da ein Anzeigename erforderlich ist, öffnen Sie das Modal, wenn der Benutzer angemeldet ist, aber keinen Namen hat.
                     userDisplayName.textContent = t.user_status_id + user.uid.substring(0, 8);
                     nameModal.classList.remove('hidden');
                 }
                 
-         
+                // Live-Update von Nachrichten starten, nachdem der Benutzer angemeldet ist
                 listenForMessages();
             } else {
                 console.log("Kein Benutzer angemeldet. Anonym anmelden...");
                 try {
-                
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Angemeldet mit benutzerdefiniertem Token.");
-                    } else {
-                        await signInAnonymously(auth);
-                        console.log("Anonym angemeldet.");
-                    }
+                    await signInAnonymously(auth);
+                    console.log("Anonym angemeldet.");
                 } catch (error) {
                     console.error("Fehler bei der Anmeldung:", error);
                     if (error.code === 'auth/configuration-not-found') {
@@ -387,7 +392,7 @@
             }
         });
 
-    
+        // Event-Listener für das Benutzernamen-Modal
         saveNameBtn.addEventListener('click', () => {
             const name = nameInput.value.trim();
             const t = translations[currentLang];
@@ -401,7 +406,7 @@
             }
         });
 
- 
+        // Nachrichten oder Bilder senden
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = messageInput.value.trim();
@@ -414,7 +419,7 @@
                 const reader = new FileReader();
                 reader.onloadend = async function() {
                     messageData = {
-                        text: text, 
+                        text: text, // Sende auch den Text, wenn ein Bild hochgeladen wird
                         image: reader.result,
                         senderId: auth.currentUser.uid,
                         displayName: displayName,
@@ -438,7 +443,7 @@
         });
 
         async function addMessageToFirestore(data) {
-       
+            // Pfad wurde auf den öffentlichen Pfad geändert, um einen Gruppenchat zu ermöglichen
             const messagesCollectionPath = `artifacts/${appId}/public/data/messages`;
             try {
                 await addDoc(collection(db, messagesCollectionPath), data);
