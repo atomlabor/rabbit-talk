@@ -1,14 +1,20 @@
- - name: Inject Firebase Config
+name: Deploy to GitHub Pageson:push:branches:- mainjobs:build-and-deploy:runs-on: ubuntu-lateststeps:- name: Checkout Repositoryuses: actions/checkout@v2  - name: Inject Firebase Config
     run: |
-      sed -i "s|'${{ secrets.FIREBASE_API_KEY }}'|'${{ secrets.FIREBASE_API_KEY }}'|" chat_app.html
-      sed -i "s|'${{ secrets.FIREBASE_AUTH_DOMAIN }}'|'${{ secrets.FIREBASE_AUTH_DOMAIN }}'|" chat_app.html
-      sed -i "s|'${{ secrets.FIREBASE_PROJECT_ID }}'|'${{ secrets.FIREBASE_PROJECT_ID }}'|" chat_app.html
-      sed -i "s|'${{ secrets.FIREBASE_STORAGE_BUCKET }}'|'${{ secrets.FIREBASE_STORAGE_BUCKET }}'|" chat_app.html
-      sed -i "s|'${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'|'${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'|" chat_app.html
-      sed -i "s|'${{ secrets.FIREBASE_APP_ID }}'|'${{ secrets.FIREBASE_APP_ID }}'|" chat_app.html
-
+      # Erstellen der temporären Datei mit der korrekten Firebase-Konfiguration
+      FIREBASE_CONFIG_JS="const firebaseConfig = {
+          apiKey: \"${{ secrets.FIREBASE_API_KEY }}\",
+          authDomain: \"${{ secrets.FIREBASE_AUTH_DOMAIN }}\",
+          projectId: \"${{ secrets.FIREBASE_PROJECT_ID }}\",
+          storageBucket: \"${{ secrets.FIREBASE_STORAGE_BUCKET }}\",
+          messagingSenderId: \"${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}\",
+          appId: \"${{ secrets.FIREBASE_APP_ID }}\"
+      };"
+      
+      # Ersetzen des gesamten Konfigurationsblocks in der HTML-Datei
+      sed -i 's|const firebaseConfig = {[^}]*};|'"$FIREBASE_CONFIG_JS"'|' chat_app.html
+      
   - name: Deploy to GitHub Pages
     uses: peaceiris/actions-gh-pages@v3
     with:
       github_token: ${{ secrets.GITHUB_TOKEN }}
-      publish_dir: ./
+      publish_dir: .
