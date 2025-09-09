@@ -1,4 +1,18 @@
-name: Deploy to GitHub Pageson:push:branches:- mainjobs:build-and-deploy:runs-on: ubuntu-lateststeps:- name: Checkout Repositoryuses: actions/checkout@v2  - name: Inject Firebase Config
+name: Deploy to GitHub Pages
+
+on:
+push:
+branches:
+- main
+
+jobs:
+build-and-deploy:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout Repository
+uses: actions/checkout@v2
+
+  - name: Inject Firebase Config
     run: |
       # Firebase-Konfigurationswerte aus den Secrets laden
       FIREBASE_API_KEY="${{ secrets.FIREBASE_API_KEY }}"
@@ -22,8 +36,8 @@ name: Deploy to GitHub Pageson:push:branches:- mainjobs:build-and-deploy:runs-on
       # Aktualisierten Inhalt in die Datei zurückschreiben
       echo "$UPDATED_HTML_CONTENT" > chat_app.html
 
-  - name: index.html
-    run: index.html
+  - name: Rename to index.html
+    run: mv chat_app.html index.html
       
   - name: Deploy to GitHub Pages
     uses: peaceiris/actions-gh-pages@v3
