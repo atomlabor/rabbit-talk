@@ -12,6 +12,9 @@ steps:
 - name: Checkout Repository
 uses: actions/checkout@v2
 
+  - name: Rename HTML file for GitHub Pages
+    run: mv chat_app.html index.html
+
   - name: Inject Firebase Config
     run: |
       # Firebase-Konfigurationswerte aus den Secrets laden
