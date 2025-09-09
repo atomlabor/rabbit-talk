@@ -23,7 +23,7 @@ uses: actions/checkout@v2
       FIREBASE_APP_ID="${{ secrets.FIREBASE_APP_ID }}"
 
       # Original-HTML-Datei lesen
-      HTML_CONTENT=$(cat chat_app.html)
+      HTML_CONTENT=$(cat index.html)
 
       # Platzhalter in der HTML-Datei ersetzen
       UPDATED_HTML_CONTENT="${HTML_CONTENT/\"\${FIREBASE_API_KEY}\"/\"$FIREBASE_API_KEY\"}"
@@ -34,10 +34,7 @@ uses: actions/checkout@v2
       UPDATED_HTML_CONTENT="${UPDATED_HTML_CONTENT/\"\${FIREBASE_APP_ID}\"/\"$FIREBASE_APP_ID\"}"
 
       # Aktualisierten Inhalt in die Datei zurückschreiben
-      echo "$UPDATED_HTML_CONTENT" > chat_app.html
-
-  - name: Rename to index.html
-    run: mv chat_app.html index.html
+      echo "$UPDATED_HTML_CONTENT" > index.html
       
   - name: Deploy to GitHub Pages
     uses: peaceiris/actions-gh-pages@v3
