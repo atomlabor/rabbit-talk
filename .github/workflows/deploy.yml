@@ -13,7 +13,7 @@ steps:
 uses: actions/checkout@v2
 
   - name: Rename HTML file for GitHub Pages
-    run: mv chat_app.html index.html
+    run: index.html
 
   - name: Inject Firebase Config
     run: |
