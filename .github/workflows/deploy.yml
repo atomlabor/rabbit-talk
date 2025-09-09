@@ -10,10 +10,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      # Optional: Rename HTML file, falls nötig (hier als Beispiel - passe ggf. an)
-      # - name: Rename HTML file for GitHub Pages
-      #   run: mv start.html index.html
+      - name: List files
+        run: ls -lh
 
 - name: Inject Firebase Config
   run: |
