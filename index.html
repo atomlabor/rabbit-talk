@@ -111,7 +111,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         
         // Die folgenden Platzhalter werden von GitHub Actions während des Deployments ersetzt.
@@ -125,8 +125,9 @@
             appId: "${FIREBASE_APP_ID}"
         };
         
-        // Ersetzen Sie 'your-app-id' durch einen beliebigen, eindeutigen String für Ihre App.
-        const appId = "your-app-id";
+        // Verwende die bereitgestellte App-ID, um sicherzustellen, dass die App funktioniert.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -146,6 +147,7 @@
         const languageSelector = document.getElementById('language-selector');
         const messageBox = document.getElementById('message-box');
 
+        // Der Anzeigename wird im Browser-Speicher gespeichert, damit er bei der nächsten Sitzung erhalten bleibt.
         let displayName = localStorage.getItem('chatDisplayName') || '';
 
         // Mehrsprachige Übersetzungen
@@ -164,6 +166,7 @@
                 error_sending: 'Nachricht konnte nicht gesendet werden.',
                 login_error: 'Fehler bei der Anmeldung. Bitte lade die Seite neu.',
                 auth_config_error: 'Anmeldefehler: Firebase-Authentifizierung ist in Ihrem Projekt nicht aktiviert. Bitte überprüfen Sie die Einstellungen in der Firebase-Konsole.',
+                auth_api_key_error: 'Fehler beim Laden des Firebase API-Schlüssels. Bitte überprüfen Sie, ob der "FIREBASE_API_KEY"-Secret in Ihrem GitHub-Repository korrekt eingerichtet ist.',
                 your_name: 'Du',
                 enter_name_alert: 'Bitte geben Sie einen Namen ein.'
             },
@@ -181,6 +184,7 @@
                 error_sending: 'Could not send message.',
                 login_error: 'Error logging in. Please reload the page.',
                 auth_config_error: 'Login error: Firebase Authentication is not enabled in your project. Please check the settings in the Firebase console.',
+                auth_api_key_error: 'Firebase API key failed to load. Please verify that the "FIREBASE_API_KEY" secret in your GitHub repository is correctly configured.',
                 your_name: 'You',
                 enter_name_alert: 'Please enter a name.'
             }
@@ -216,7 +220,7 @@
             if (displayName) {
                 userDisplayName.textContent = t.user_status_name + displayName;
             } else if (auth.currentUser) {
-                userDisplayName.textContent = t.user_status_id + auth.currentUser.uid.substring(0, 8);
+                userDisplayName.textContent = t.user_status_id + auth.currentUser.uid;
             }
         }
         
@@ -240,7 +244,7 @@
                 messageElement.classList.add('self-start', 'bg-[#3a3a3a]');
             }
 
-            const senderName = message.displayName || `${t.user_status_id}${message.senderId.substring(0, 8)}`;
+            const senderName = message.displayName || `${t.user_status_id}${message.senderId}`;
             const senderIdElement = document.createElement('span');
             senderIdElement.classList.add('text-xs', 'font-bold', 'mb-1', 'text-gray-300');
             senderIdElement.textContent = isMe ? t.your_name : senderName;
@@ -366,24 +370,44 @@
                     userDisplayName.textContent = t.user_status_name + displayName;
                 } else {
                     // Da ein Anzeigename erforderlich ist, öffnen Sie das Modal, wenn der Benutzer angemeldet ist, aber keinen Namen hat.
-                    userDisplayName.textContent = t.user_status_id + user.uid.substring(0, 8);
+                    userDisplayName.textContent = t.user_status_id + user.uid;
                     nameModal.classList.remove('hidden');
                 }
                 
                 // Live-Update von Nachrichten starten, nachdem der Benutzer angemeldet ist
                 listenForMessages();
             } else {
-                console.log("Kein Benutzer angemeldet. Anonym anmelden...");
+                console.log("Kein Benutzer angemeldet. Melde anonym an...");
                 try {
-                    await signInAnonymously(auth);
-                    console.log("Anonym angemeldet.");
+                    // Überprüfen, ob Firebase-Platzhalter vorhanden sind, was auf einen fehlerhaften GitHub Actions-Workflow hinweist.
+                    if (firebaseConfig.apiKey.includes("FIREBASE_API_KEY")) {
+                         if (statusMessage) {
+                            statusMessage.textContent = t.auth_api_key_error;
+                        }
+                        console.error(t.auth_api_key_error);
+                        return; // Beenden, um weitere Fehler zu vermeiden
+                    }
+                    
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Mit benutzerdefiniertem Token angemeldet.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Anonym angemeldet.");
+                    }
+
                 } catch (error) {
                     console.error("Fehler bei der Anmeldung:", error);
                     if (error.code === 'auth/configuration-not-found') {
                         if (statusMessage) {
                              statusMessage.textContent = t.auth_config_error;
                         }
-                    } else {
+                    } else if (error.code === 'auth/invalid-api-key') {
+                         if (statusMessage) {
+                            statusMessage.textContent = t.auth_api_key_error;
+                        }
+                    }
+                    else {
                         if (statusMessage) {
                             statusMessage.textContent = t.login_error;
                         }
