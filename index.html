@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rabbit-talk</title>
-    <!-- Tailwind CSS CDN für einfache und schnelle Gestaltung -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -114,8 +113,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
-        // Die folgenden Platzhalter werden von GitHub Actions während des Deployments ersetzt.
-        // Fügen Sie diese nicht manuell ein!
       const firebaseConfig = {
         apiKey: ${FIREBASE_API_KEY},
         authDomain: ${FIREBASE_AUTH_DOMAIN},
